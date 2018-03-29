@@ -1,0 +1,36 @@
+{
+  "name": "serverless-auth-boilerplate",
+  "version": "1.0.0",
+  "description": "Serverless backend in AWS Lambda with basic Auth features. Using serverless-async-await to support async await syntax, and serverless-plugin-warmup to prevent cold start issue.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calvinkei/serverless-auth-boilerplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calvinkei/serverless-auth-boilerplate/issues"
+  },
+  "homepage": "https://github.com/calvinkei/serverless-auth-boilerplate#readme",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0-rc.2",
+    "cheerio-tableparser": "^1.0.1",
+    "chromeless": "^1.5.0",
+    "jsonwebtoken": "^8.1.1",
+    "lodash": "^4.17.4",
+    "moment": "^2.20.1",
+    "path": "^0.12.7",
+    "query-string": "^5.1.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "serverless-async-await": "git+https://github.com/calvinkei/serverless-async-await.git",
+    "serverless-plugin-warmup": "^3.3.0-rc.1"
+  }
+}
