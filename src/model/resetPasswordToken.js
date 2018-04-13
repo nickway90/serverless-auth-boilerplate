@@ -1,11 +1,7 @@
 const AWS = require('aws-sdk');
-const bcrypt = require('bcryptjs');
-const uuid = require('uuid/v4');
 const crypto = require('crypto');
 const moment = require('moment');
 const docClient = new AWS.DynamoDB.DocumentClient();
-const { PASSWORD_SALT_ROUNDS, REFRESH_TOKEN_BYTES } = require('src/service/config');
-const { createRandomBytes } = require('src/service/auth');
 
 const getCredentialsByUsername = async (username) => {
   try {
@@ -41,19 +37,21 @@ const getCredentialsByRefreshToken = async (refresh_token) => {
 
 const create = async (username, unhashed) => {
   try {
-    const refresh_token = await createRandomBytes(REFRESH_TOKEN_BYTES);
-    const password = await bcrypt.hash(unhashed, PASSWORD_SALT_ROUNDS);
-    const params = {
-      TableName: 'users',
-      Item: {
-        id: uuid().replace(/-/g, ''),
-        username,
-        password,
-        refresh_token,
-      }
-    };
-    await docClient.put(params).promise();
-    return { success: true }
+    crypto.randomBytes(128, async (err, buf) => {
+      if (err) throw err;
+      const password = await bcrypt.hash(unhashed, SALT_ROUNDS);
+      const params = {
+        TableName: 'users',
+        Item: {
+          id: uuid().replace(/-/g, ''),
+          username,
+          password,
+          refresh_token: buf.toString('hex'),
+        }
+      };
+      await docClient.put(params).promise();
+      return { success: true }
+    })
   } catch(err) {
     return Promise.reject(err);
   }

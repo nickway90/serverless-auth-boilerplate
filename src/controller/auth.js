@@ -6,8 +6,6 @@ const user = require('src/model/user');
 const response = require('src/service/response');
 const { authErrors } = require('src/service/errorTypes');
 const { signCert } = require('src/service/auth');
-const cert = fs.readFileSync(path.join(__dirname, 'sec/jwt.key'));
-const SIGN_OPTIONS = { algorithm: 'RS256', expiresIn: 3600 };
 
 const loginByPassword = async (params, callback) => {
   try {
@@ -49,7 +47,7 @@ const register = async (params, callback) => {
     const { username, password } = params
     const users = await user.getCredentialsByUsername(username);
     if (users.length === 0) {
-      await user.register(username, password);
+      await user.create(username, password);
       loginByPassword(params, callback);
     } else {
       callback(null, response(authErrors.USER_ALREADY_EXISTED, 400));
@@ -59,7 +57,22 @@ const register = async (params, callback) => {
   }
 }
 
+const forgotPassword = async (params, callback) => {
+  try {
+    const { username, password } = params
+    const users = await user.getCredentialsByUsername(username);
+    if (users.length >= 0) {
+      // Create resetPasswordToken and send email to user
+    } else {
+      callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
+    }
+  } catch(err) {
+    callback(null, response(err, 400));
+  }
+}
+
 module.exports = {
   loginByPassword,
   loginByRefreshToken,
+  register,
 }

@@ -15,7 +15,6 @@ const authErrors = {
     code: 4,
     message: 'Invalid grant type'
   },
-
   USER_DOESNT_EXIST: {
     code: 5,
     message: 'User does\'t exist'
@@ -26,7 +25,15 @@ const authErrors = {
   },
   USER_ALREADY_EXISTED: {
     code: 7,
-    message: 'User already existed'  
+    message: 'User already existed'
+  },
+  NO_USERNAME_OR_TOKEN: {
+    code: 8,
+    message: 'Please enter username or token'
+  },
+  NO_NEW_PASSWORD: {
+    code: 9,
+    message: 'Please enter new password'
   }
 }
 
