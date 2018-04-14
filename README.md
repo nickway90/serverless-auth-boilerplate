@@ -1,3 +1,5 @@
+# This boilerplate is still under development
+
 # serverless-auth-boilerplate
 Serverless backend in AWS Lambda with basic Auth features. Using serverless-async-await to support async await syntax, and serverless-plugin-warmup to prevent cold start issue.
 
@@ -9,5 +11,5 @@ This module uses DynamoDB but you can easily tweak into any DB of your choice. I
 1. Create `sec/jwt.key` and `sec/jwt.key.pub` for JSON Web Token
 2. Change configs on `serverless.yml`
 3. Set up environmental variables for AWS keys
-4. If you are using DynamoDB, create a table with `id, username, password, refresh_token` fields
+4. If you are using DynamoDB, create a table with `id` as primary key, `username, refreshToken` as GSI with name `username-index, refreshToken-index`
 5. If you do not want to use DynamoDB, just edit the `model` folder to CRUD from the DB of your choice

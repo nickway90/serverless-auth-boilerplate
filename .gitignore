@@ -60,4 +60,8 @@ typings/
 # JWT key
 sec/
 
+# serverless build folder
+__build__
+.serverless
+
 .DS_Store

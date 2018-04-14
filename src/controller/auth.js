@@ -1,7 +1,4 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
 const user = require('src/model/user');
 const response = require('src/service/response');
 const { authErrors } = require('src/service/errorTypes');
@@ -18,33 +15,33 @@ const loginByPassword = async (params, callback) => {
         callback(null, response(authErrors.INCORRECT_PASSWORD, 400));
       } else {
         const cert = await signCert(users[0].id);
-        cert.refresh_token = users[0].refresh_token;
+        cert.refreshToken = users[0].refreshToken;
         callback(null, response(cert));
       }
     }
-  } catch(err) {
+  } catch (err) {
     callback(null, response(err, 400));
   }
-}
+};
 
 const loginByRefreshToken = async (params, callback) => {
   try {
-    const users = await user.getCredentialsByRefreshToken(params.refresh_token);
+    const users = await user.getCredentialsByRefreshToken(params.refreshToken);
     if (users.length === 0) {
       callback(response(authErrors.USER_DOESNT_EXIST, 400));
     } else {
       const cert = await signCert(users[0].id);
-      cert.refresh_token = params.refresh_token;
+      cert.refreshToken = params.refreshToken;
       callback(null, response(cert));
     }
-  } catch(err) {
+  } catch (err) {
     callback(null, response(err, 400));
   }
-}
+};
 
 const register = async (params, callback) => {
   try {
-    const { username, password } = params
+    const { username, password } = params;
     const users = await user.getCredentialsByUsername(username);
     if (users.length === 0) {
       await user.create(username, password);
@@ -52,10 +49,10 @@ const register = async (params, callback) => {
     } else {
       callback(null, response(authErrors.USER_ALREADY_EXISTED, 400));
     }
-  } catch(err) {
+  } catch (err) {
     callback(null, response(err, 400));
   }
-}
+};
 
 const forgotPassword = async (params, callback) => {
   try {
@@ -66,13 +63,44 @@ const forgotPassword = async (params, callback) => {
     } else {
       callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
     }
-  } catch(err) {
+  } catch (err) {
     callback(null, response(err, 400));
   }
-}
+};
+
+const resetPasswordByToken = async (params, callback) => {
+  try {
+    const { refreshToken, password } = params
+    const users = await user.getCredentialsByRefreshToken(refreshToken);
+    if (users.length >= 0) {
+      // Create resetPasswordToken and send email to user
+    } else {
+      callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
+    }
+  } catch (err) {
+    callback(null, response(err, 400));
+  }
+};
+
+const resetPasswordByUsername = async (params, callback) => {
+  try {
+    const { username, password } = params
+    const users = await user.getCredentialsByUsername(username);
+    if (users.length >= 0) {
+      // Reset Password
+    } else {
+      callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
+    }
+  } catch (err) {
+    callback(null, response(err, 400));
+  }
+};
 
 module.exports = {
   loginByPassword,
   loginByRefreshToken,
   register,
-}
+  forgotPassword,
+  resetPasswordByToken,
+  resetPasswordByUsername,
+};

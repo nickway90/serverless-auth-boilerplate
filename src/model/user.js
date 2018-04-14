@@ -1,8 +1,6 @@
 const AWS = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid/v4');
-const crypto = require('crypto');
-const moment = require('moment');
 const docClient = new AWS.DynamoDB.DocumentClient();
 const { PASSWORD_SALT_ROUNDS, REFRESH_TOKEN_BYTES } = require('src/service/config');
 const { createRandomBytes } = require('src/service/auth');
@@ -13,35 +11,35 @@ const getCredentialsByUsername = async (username) => {
       TableName: 'users',
       IndexName: 'username-index',
       KeyConditionExpression: '#username = :username',
-      ExpressionAttributeNames:{ '#username': 'username' },
+      ExpressionAttributeNames: { '#username': 'username' },
       ExpressionAttributeValues: { ':username': username },
-      ProjectionExpression: 'password, id, refresh_token'
+      ProjectionExpression: 'password, id, refreshToken',
     }).promise();
     return result.Items;
-  } catch(err) {
+  } catch (err) {
     return Promise.reject(err);
   }
-}
+};
 
-const getCredentialsByRefreshToken = async (refresh_token) => {
+const getCredentialsByRefreshToken = async (refreshToken) => {
   try {
     const result = await docClient.query({
-      TableName : 'users',
-      IndexName: 'refresh_token-index',
-      KeyConditionExpression: '#refresh_token = :refresh_token',
-      ExpressionAttributeNames:{ '#refresh_token': 'refresh_token' },
-      ExpressionAttributeValues: { ':refresh_token': refresh_token },
-      ProjectionExpression: 'password, id'
+      TableName: 'users',
+      IndexName: 'refreshToken_index',
+      KeyConditionExpression: '#refreshToken = :refreshToken',
+      ExpressionAttributeNames: { '#refreshToken': 'refreshToken' },
+      ExpressionAttributeValues: { ':refreshToken': refreshToken },
+      ProjectionExpression: 'password, id',
     }).promise();
     return result.Items;
-  } catch(err) {
+  } catch (err) {
     return Promise.reject(err);
   }
-}
+};
 
 const create = async (username, unhashed) => {
   try {
-    const refresh_token = await createRandomBytes(REFRESH_TOKEN_BYTES);
+    const refreshToken = await createRandomBytes(REFRESH_TOKEN_BYTES);
     const password = await bcrypt.hash(unhashed, PASSWORD_SALT_ROUNDS);
     const params = {
       TableName: 'users',
@@ -49,18 +47,18 @@ const create = async (username, unhashed) => {
         id: uuid().replace(/-/g, ''),
         username,
         password,
-        refresh_token,
-      }
+        refreshToken,
+      },
     };
     await docClient.put(params).promise();
-    return { success: true }
-  } catch(err) {
+    return { success: true };
+  } catch (err) {
     return Promise.reject(err);
   }
-}
+};
 
 module.exports = {
   getCredentialsByUsername,
   getCredentialsByRefreshToken,
   create,
-}
+};

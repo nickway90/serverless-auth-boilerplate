@@ -13,17 +13,17 @@ const loginValidator = event => {
       params.username = body.username;
       params.password = body.password;
     }
-  } else if (body.grant_type === 'refresh_token') {
-    if (!body.refresh_token) {
-      err = authErrors.NO_REFRESH_TOKEN;
+  } else if (body.grant_type === 'refreshToken') {
+    if (!body.refreshToken) {
+      err = authErrors.NO_refreshToken;
     } else {
-      params.refresh_token = body.refresh_token;
+      params.refreshToken = body.refreshToken;
     }
   } else {
     err = authErrors.INVALID_GRANT_TYPE;
   }
-  return { err, params }
-}
+  return { err, params };
+};
 
 const registerValidator = event => {
   const body = JSON.parse(event.body);
@@ -37,8 +37,8 @@ const registerValidator = event => {
     params.username = body.username;
     params.password = body.password;
   }
-  return { err, params }
-}
+  return { err, params };
+};
 
 const forgotPasswordValidator = event => {
   const body = JSON.parse(event.body);
@@ -49,8 +49,8 @@ const forgotPasswordValidator = event => {
   } else {
     params.username = body.username;
   }
-  return { err, params }
-}
+  return { err, params };
+};
 
 const resetPasswordValidator = event => {
   const body = JSON.parse(event.body);
@@ -68,12 +68,12 @@ const resetPasswordValidator = event => {
     params.password = body.password;
     params.new_password = body.new_password;
   }
-  return { err, params }
-}
+  return { err, params };
+};
 
 module.exports = {
   loginValidator,
   registerValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
-}
+};
