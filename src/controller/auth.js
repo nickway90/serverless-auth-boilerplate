@@ -28,7 +28,7 @@ const loginByRefreshToken = async (params, callback) => {
 	try {
 		const users = await user.getCredentialsByRefreshToken(params.refreshToken);
 		if (users.length === 0) {
-			callback(response(authErrors.USER_DOESNT_EXIST, 400));
+			callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
 		} else {
 			const cert = await signCert(users[0].id);
 			cert.refreshToken = params.refreshToken;
@@ -56,10 +56,12 @@ const register = async (params, callback) => {
 
 const forgotPassword = async (params, callback) => {
 	try {
-		const { username, password } = params;
+		const { username } = params;
 		const users = await user.getCredentialsByUsername(username);
 		if (users.length >= 0) {
-			// Create resetPasswordToken and send email to user
+			const token = await user.setResetPasswordToken(users[0].id)
+			await sendEmail('domain.com Password Reset', 'forgot-password', username, { TOKEN: token })
+			callback(null, response({ success: true }));
 		} else {
 			callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
 		}

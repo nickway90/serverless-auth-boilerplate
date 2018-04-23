@@ -11,6 +11,7 @@ const JWT_CERT = fs.readFileSync(path.join(__dirname, '../../sec/jwt.key'));
 
 const PASSWORD_SALT_ROUNDS = 10;
 const REFRESH_TOKEN_BYTES = 128;
+const RESET_PASSWORD_TOKEN_BYTES = 128;
 // Misc
 const FORGOT_PASSWORD_EMAIL_TEMPLATE = '';
 
@@ -21,5 +22,6 @@ module.exports = {
 	JWT_CERT,
 	PASSWORD_SALT_ROUNDS,
 	REFRESH_TOKEN_BYTES,
+	RESET_PASSWORD_TOKEN_BYTES,
 	FORGOT_PASSWORD_EMAIL_TEMPLATE,
 };

@@ -2,6 +2,8 @@ service: serverless-auth-boilerplate
 
 provider:
   name: aws
+  environment:
+    MANDRILL_KEY: THIS_IS_A_KEY
   runtime: nodejs6.10
   region: ap-northeast-1
   iamRoleStatements:
@@ -37,4 +39,15 @@ functions:
       - http:
           method: POST
           path: /auth/register
+          cors: true
+
+  forgorPassword:
+    warmup: true
+    memorySize: 512
+    timeout: 3
+    handler: src/route/auth.forgorPassword
+    events:
+      - http:
+          method: POST
+          path: /auth/forgot-password
           cors: true
