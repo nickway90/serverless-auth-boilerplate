@@ -45,6 +45,24 @@ const getCredentialsByRefreshToken = async refreshToken => {
 	}
 };
 
+const getIdByResetPasswordToken = async resetPasswordToken => {
+	try {
+		const result = await docClient
+			.query({
+				TableName: 'users',
+				IndexName: 'resetPasswordToken_index',
+				KeyConditionExpression: '#resetPasswordToken = :resetPasswordToken',
+				ExpressionAttributeNames: { '#resetPasswordToken': 'resetPasswordToken' },
+				ExpressionAttributeValues: { ':resetPasswordToken': resetPasswordToken },
+				ProjectionExpression: 'id, resetPasswordTokenExpire',
+			})
+			.promise();
+		return result.Items.filter(item => item.resetPasswordTokenExpire > moment().valueOf());
+	} catch (err) {
+		return Promise.reject(err);
+	}
+};
+
 const create = async (username, unhashed) => {
 	try {
 		const refreshToken = await createRandomBytes(REFRESH_TOKEN_BYTES);
@@ -82,9 +100,30 @@ const setResetPasswordToken = async id => {
 	}
 }
 
+const resetPassword = async (id, unhashed) => {
+	try {
+		const password = await bcrypt.hash(unhashed, PASSWORD_SALT_ROUNDS);
+		await docClient.update({
+			TableName: 'users',
+			Key: { id },
+			UpdateExpression: 'set password = :password, resetPasswordTokenExpire = :expire',
+			ExpressionAttributeValues: {
+				':password': password,
+				':expire': moment().valueOf(),
+			},
+			ReturnValues: 'UPDATED_NEW',
+		}).promise();
+		return { success: true };
+	} catch(err) {
+		return Promise.reject(err);
+	}
+}
+
 module.exports = {
 	getCredentialsByUsername,
 	getCredentialsByRefreshToken,
+	getIdByResetPasswordToken,
 	create,
 	setResetPasswordToken,
+	resetPassword,
 };

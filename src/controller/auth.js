@@ -72,12 +72,13 @@ const forgotPassword = async (params, callback) => {
 
 const resetPasswordByToken = async (params, callback) => {
 	try {
-		const { refreshToken, password } = params;
-		const users = await user.getCredentialsByRefreshToken(refreshToken);
-		if (users.length >= 0) {
-			// Create resetPasswordToken and send email to user
+		const { resetPasswordToken, new_password } = params;
+		const users = await user.getIdByResetPasswordToken(resetPasswordToken)
+		if (users.length > 0) {
+			const result = await user.resetPassword(users[0].id, new_password);
+			callback(null, response(result));
 		} else {
-			callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
+			callback(null, response(authErrors.RESET_PASSWORD_TOKEN_EXPIRED, 400));
 		}
 	} catch (err) {
 		callback(null, response(err, 400));
@@ -86,10 +87,15 @@ const resetPasswordByToken = async (params, callback) => {
 
 const resetPasswordByUsername = async (params, callback) => {
 	try {
-		const { username, password } = params;
+		const { username, password, new_password } = params;
 		const users = await user.getCredentialsByUsername(username);
 		if (users.length >= 0) {
-			// Reset Password
+			const match = await bcrypt.compare(password, users[0].password);
+			if (match) {
+				const result = await user.resetPassword(users[0].id, new_password);
+			} else {
+				callback(null, response(authErrors.INCORRECT_PASSWORD, 400));
+			}
 		} else {
 			callback(null, response(authErrors.USER_DOESNT_EXIST, 400));
 		}

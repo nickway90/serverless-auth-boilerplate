@@ -35,6 +35,10 @@ const authErrors = {
 		code: 9,
 		message: 'Please enter new password',
 	},
+	RESET_PASSWORD_TOKEN_EXPIRED: {
+		code: 10,
+		message: 'Reset password token is not valid or expired'
+	},
 };
 
 module.exports = {
