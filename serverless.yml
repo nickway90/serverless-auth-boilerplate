@@ -2,8 +2,6 @@ service: serverless-auth-boilerplate
 
 provider:
   name: aws
-  environment:
-    MANDRILL_KEY: THIS_IS_A_KEY
   runtime: nodejs6.10
   region: ap-northeast-1
   iamRoleStatements:
