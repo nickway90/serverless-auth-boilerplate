@@ -7,7 +7,7 @@ const authErrors = {
 		code: 2,
 		message: 'Please enter password',
 	},
-	NO_refreshToken: {
+	NO_REFRESH_TOKEN: {
 		code: 3,
 		message: 'Refresh token is missing',
 	},
@@ -37,7 +37,11 @@ const authErrors = {
 	},
 	RESET_PASSWORD_TOKEN_EXPIRED: {
 		code: 10,
-		message: 'Reset password token is not valid or expired'
+		message: 'Token is not valid or expired',
+	},
+	EMAIL_NOT_VALIDATED: {
+		code: 11,
+		message: 'Email not validated',
 	},
 };
 

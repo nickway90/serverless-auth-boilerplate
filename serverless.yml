@@ -20,7 +20,7 @@ functions:
   login:
     warmup: true
     memorySize: 512
-    timeout: 3
+    timeout: 10
     handler: src/route/auth.login
     events:
       - http:
@@ -31,7 +31,7 @@ functions:
   register:
     warmup: true
     memorySize: 512
-    timeout: 3
+    timeout: 10
     handler: src/route/auth.register
     events:
       - http:
@@ -39,13 +39,46 @@ functions:
           path: /auth/register
           cors: true
 
-  forgorPassword:
+  validate:
     warmup: true
     memorySize: 512
-    timeout: 3
-    handler: src/route/auth.forgorPassword
+    timeout: 10
+    handler: src/route/auth.validate
+    events:
+      - http:
+          method: POST
+          path: /auth/validate
+          cors: true
+
+  resendValidate:
+    warmup: true
+    memorySize: 512
+    timeout: 10
+    handler: src/route/auth.resendValidate
+    events:
+      - http:
+          method: POST
+          path: /auth/resend-validate
+          cors: true
+
+  forgotPassword:
+    warmup: true
+    memorySize: 512
+    timeout: 10
+    handler: src/route/auth.forgotPassword
     events:
       - http:
           method: POST
           path: /auth/forgot-password
+          cors: true
+
+  resetPassword:
+    warmup: true
+    memorySize: 512
+    timeout: 10
+    handler: src/route/auth.resetPassword
+    events:
+      - http:
+          method: POST
+          path: /auth/reset-password
           cors: true

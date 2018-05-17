@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid/v4');
+const moment = require('moment');
 const docClient = new AWS.DynamoDB.DocumentClient();
 const {
 	PASSWORD_SALT_ROUNDS,
@@ -18,7 +19,7 @@ const getCredentialsByUsername = async username => {
 				KeyConditionExpression: '#username = :username',
 				ExpressionAttributeNames: { '#username': 'username' },
 				ExpressionAttributeValues: { ':username': username },
-				ProjectionExpression: 'password, id, refreshToken',
+				ProjectionExpression: 'password, id, refreshToken, validated',
 			})
 			.promise();
 		return result.Items;
@@ -32,11 +33,11 @@ const getCredentialsByRefreshToken = async refreshToken => {
 		const result = await docClient
 			.query({
 				TableName: 'users',
-				IndexName: 'refreshToken_index',
+				IndexName: 'refreshToken-index',
 				KeyConditionExpression: '#refreshToken = :refreshToken',
 				ExpressionAttributeNames: { '#refreshToken': 'refreshToken' },
 				ExpressionAttributeValues: { ':refreshToken': refreshToken },
-				ProjectionExpression: 'password, id',
+				ProjectionExpression: 'password, id, validated',
 			})
 			.promise();
 		return result.Items;
@@ -50,7 +51,7 @@ const getIdByResetPasswordToken = async resetPasswordToken => {
 		const result = await docClient
 			.query({
 				TableName: 'users',
-				IndexName: 'resetPasswordToken_index',
+				IndexName: 'resetPasswordToken-index',
 				KeyConditionExpression: '#resetPasswordToken = :resetPasswordToken',
 				ExpressionAttributeNames: { '#resetPasswordToken': 'resetPasswordToken' },
 				ExpressionAttributeValues: { ':resetPasswordToken': resetPasswordToken },
@@ -67,16 +68,18 @@ const create = async (username, unhashed) => {
 	try {
 		const refreshToken = await createRandomBytes(REFRESH_TOKEN_BYTES);
 		const password = await bcrypt.hash(unhashed, PASSWORD_SALT_ROUNDS);
+		const id = uuid().replace(/-/g, '');
 		await docClient.put({
 			TableName: 'users',
 			Item: {
-				id: uuid().replace(/-/g, ''),
+				id,
 				username,
 				password,
+				validated: false,
 				refreshToken,
 			},
 		}).promise();
-		return { success: true };
+		return id;
 	} catch (err) {
 		return Promise.reject(err);
 	}
@@ -84,7 +87,7 @@ const create = async (username, unhashed) => {
 
 const setResetPasswordToken = async id => {
 	try {
-		const resetPasswordToken = await createRandomBytes(REFRESH_TOKEN_BYTES);
+		const resetPasswordToken = await createRandomBytes(RESET_PASSWORD_TOKEN_BYTES);
 		await docClient.update({
 			TableName: 'users',
 			Key: { id },
@@ -92,13 +95,13 @@ const setResetPasswordToken = async id => {
 			ExpressionAttributeValues: {
 				':token': resetPasswordToken,
 				':expire': moment().add(1, 'hour').valueOf(),
-			}
+			},
 		}).promise();
 		return resetPasswordToken;
-	} catch(err) {
+	} catch (err) {
 		return Promise.reject(err);
 	}
-}
+};
 
 const resetPassword = async (id, unhashed) => {
 	try {
@@ -111,13 +114,30 @@ const resetPassword = async (id, unhashed) => {
 				':password': password,
 				':expire': moment().valueOf(),
 			},
-			ReturnValues: 'UPDATED_NEW',
 		}).promise();
 		return { success: true };
-	} catch(err) {
+	} catch (err) {
 		return Promise.reject(err);
 	}
-}
+};
+
+const validate = async id => {
+	try {
+		const user = await docClient.update({
+			TableName: 'users',
+			Key: { id },
+			UpdateExpression: 'set validated = :validated, resetPasswordTokenExpire = :expire',
+			ExpressionAttributeValues: {
+				':validated': true,
+				':expire': moment().valueOf(),
+			},
+			ReturnValues: 'ALL_NEW',
+		}).promise();
+		return user.Attributes.refreshToken;
+	} catch (err) {
+		return Promise.reject(err);
+	}
+};
 
 module.exports = {
 	getCredentialsByUsername,
@@ -126,4 +146,5 @@ module.exports = {
 	create,
 	setResetPasswordToken,
 	resetPassword,
+	validate,
 };

@@ -2,9 +2,9 @@ const { authErrors } = require('src/util/errorTypes');
 
 const loginValidator = event => {
 	const body = JSON.parse(event.body);
-	const params = { grant_type: body.grant_type };
+	const params = { grantType: body.grantType };
 	let err;
-	if (body.grant_type === 'password') {
+	if (body.grantType === 'password') {
 		if (!body.username) {
 			err = authErrors.NO_USERNAME;
 		} else if (!body.password) {
@@ -13,9 +13,9 @@ const loginValidator = event => {
 			params.username = body.username;
 			params.password = body.password;
 		}
-	} else if (body.grant_type === 'refreshToken') {
+	} else if (body.grantType === 'refresh_token') {
 		if (!body.refreshToken) {
-			err = authErrors.NO_refreshToken;
+			err = authErrors.NO_REFRESH_TOKEN;
 		} else {
 			params.refreshToken = body.refreshToken;
 		}
@@ -40,6 +40,30 @@ const registerValidator = event => {
 	return { err, params };
 };
 
+const validateValidator = event => {
+	const body = JSON.parse(event.body);
+	const params = {};
+	let err;
+	if (!body.token) {
+		err = authErrors.RESET_PASSWORD_TOKEN_EXPIRED;
+	} else {
+		params.token = body.token;
+	}
+	return { err, params };
+};
+
+const resendValidateValidator = event => {
+	const body = JSON.parse(event.body);
+	const params = {};
+	let err;
+	if (!body.username) {
+		err = authErrors.NO_USERNAME;
+	} else {
+		params.username = body.username;
+	}
+	return { err, params };
+};
+
 const forgotPasswordValidator = event => {
 	const body = JSON.parse(event.body);
 	const params = {};
@@ -60,13 +84,13 @@ const resetPasswordValidator = event => {
 		err = authErrors.NO_USERNAME_OR_TOKEN;
 	} else if (body.username && !body.password) {
 		err = authErrors.NO_PASSWORD;
-	} else if (!body.new_password) {
+	} else if (!body.newPassword) {
 		err = authErrors.NO_NEW_PASSWORD;
 	} else {
 		params.username = body.username;
 		params.token = body.token;
 		params.password = body.password;
-		params.new_password = body.new_password;
+		params.newPassword = body.newPassword;
 	}
 	return { err, params };
 };
@@ -74,6 +98,8 @@ const resetPasswordValidator = event => {
 module.exports = {
 	loginValidator,
 	registerValidator,
+	validateValidator,
+	resendValidateValidator,
 	forgotPasswordValidator,
 	resetPasswordValidator,
 };
